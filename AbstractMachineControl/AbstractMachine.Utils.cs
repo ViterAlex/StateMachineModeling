@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,8 +15,9 @@ namespace AbstractMachineControl
         /// </summary>
         private void UpdateLists()
         {
-            States = transitDataGridView.Columns.OfType<DataGridViewColumn>().Select(c => $"{StatePrefix}{c.Index + 1}").ToList();
-            _outputs = Enumerable.Range(1, OutputsCount).Select(n => $"{OutputPrefix}{n}").ToList();
+            States = transitDataGridView.Columns.OfType<DataGridViewColumn>().Select(c =>
+                string.Format("{0}{1}", StatePrefix, c.Index + 1)).ToList();
+            _outputs = Enumerable.Range(1, OutputsCount).Select(n => string.Format("{0}{1}", OutputPrefix, n)).ToList();
             transitDataGridView.Columns.OfType<DataGridViewComboBoxColumn>().ToList().ForEach(c => c.DataSource = States);
             outputDataGridView.Columns.OfType<DataGridViewComboBoxColumn>().ToList().ForEach(c => c.DataSource = _outputs);
             InitialState = _initialStateString;
@@ -92,8 +94,8 @@ namespace AbstractMachineControl
                 {
                     var index = transitDataGridView.Rows.Add();
                     outputDataGridView.Rows.Add();
-                    transitDataGridView.Rows[index].HeaderCell.Value = $"{InputPrefix}{index + 1}";
-                    outputDataGridView.Rows[index].HeaderCell.Value = $"{InputPrefix}{index + 1}";
+                    transitDataGridView.Rows[index].HeaderCell.Value = string.Format("{0}{1}", InputPrefix, index + 1);
+                    outputDataGridView.Rows[index].HeaderCell.Value = string.Format("{0}{1}", InputPrefix, index + 1);
                 }
             }
         }
@@ -121,20 +123,20 @@ namespace AbstractMachineControl
                 {
                     var column = new DataGridViewComboBoxColumn
                     {
-                        Name = $"{StatePrefix}{transitDataGridView.ColumnCount}",
-                        HeaderText = $"{StatePrefix}{transitDataGridView.ColumnCount + 1}"
+                        Name = string.Format("{0}{1}", StatePrefix, transitDataGridView.ColumnCount),
+                        HeaderText = string.Format("{0}{1}", StatePrefix, transitDataGridView.ColumnCount + 1)
                     };
                     transitDataGridView.Columns.Add(column);
                     var column1 = new DataGridViewComboBoxColumn
                     {
-                        Name = $"{StatePrefix}{outputDataGridView.ColumnCount}",
-                        HeaderText = $"{StatePrefix}{outputDataGridView.ColumnCount + 1}"
+                        Name = string.Format("{0}{1}", StatePrefix, outputDataGridView.ColumnCount),
+                        HeaderText = string.Format("{0}{1}", StatePrefix, outputDataGridView.ColumnCount + 1)
                     };
                     outputDataGridView.Columns.Add(column1);
                 }
             }
             UpdateLists();
-            MarkInitialState();
+            MarkInitialState(0,0);
         }
         /// <summary>
         /// Обновление префиксов
@@ -142,32 +144,26 @@ namespace AbstractMachineControl
         private void UpdatePrefixes()
         {
             foreach (DataGridViewRow row in transitDataGridView.Rows)
-                row.HeaderCell.Value = $"{InputPrefix}{row.Index + 1}";
+                row.HeaderCell.Value = string.Format("{0}{1}", InputPrefix, row.Index + 1);
             foreach (DataGridViewRow row in outputDataGridView.Rows)
-                row.HeaderCell.Value = $"{InputPrefix}{row.Index + 1}";
+                row.HeaderCell.Value = string.Format("{0}{1}", InputPrefix, row.Index + 1);
             foreach (DataGridViewColumn column in transitDataGridView.Columns)
-                column.HeaderText = $"{StatePrefix}{column.Index + 1}";
+                column.HeaderText = string.Format("{0}{1}", StatePrefix, column.Index + 1);
             foreach (DataGridViewColumn column in outputDataGridView.Columns)
-                column.HeaderText = $"{StatePrefix}{column.Index + 1}";
+                column.HeaderText = string.Format("{0}{1}", StatePrefix, column.Index + 1);
             UpdateLists();
         }
         /// <summary>
         /// Выделение столбца с начальным состоянием
         /// </summary>
-        private void MarkInitialState()
+        private void MarkInitialState(int oldIndex, int newIndex)
         {
-            foreach (DataGridViewColumn column in transitDataGridView.Columns)
-            {
-                column.HeaderCell.Style.BackColor = column.Index == _initialStateIndex
-                    ? Color.Orange
-                    : SystemColors.Control;
-            }
-            foreach (DataGridViewColumn column in outputDataGridView.Columns)
-            {
-                column.HeaderCell.Style.BackColor = column.Index == _initialStateIndex
-                    ? Color.Orange
-                    : SystemColors.Control;
-            }
+            if (transitDataGridView.ColumnCount == 0 || outputDataGridView.ColumnCount == 0) return;
+            
+            transitDataGridView.Columns[oldIndex].HeaderCell.Style.BackColor = SystemColors.Control;
+            transitDataGridView.Columns[newIndex].HeaderCell.Style.BackColor = Color.Orange;
+            outputDataGridView.Columns[oldIndex].HeaderCell.Style.BackColor = SystemColors.Control;
+            outputDataGridView.Columns[newIndex].HeaderCell.Style.BackColor = Color.Orange;
         }
         //TODO:Создание машины
         private void CreateMachine(bool isMoore)
@@ -203,7 +199,7 @@ namespace AbstractMachineControl
                     mb.AddTransition(from, input, to, output);
                 }
             }
-            MachineCreated?.Invoke(this, new MachineEventArgs(mb, mb.GetType()));
+            if (MachineCreated != null) MachineCreated.Invoke(this, new MachineEventArgs(mb, mb.GetType()));
         }
         /// <summary>
         /// Смена типа машины. Скрываются строки, ненужные для автомата Мура
@@ -215,7 +211,7 @@ namespace AbstractMachineControl
             {
                 outputDataGridView.Rows[i].Visible = !IsMoore;
             }
-            outputDataGridView.Rows[0].HeaderCell.Value = IsMoore ? "" : $"{InputPrefix}1";
+            outputDataGridView.Rows[0].HeaderCell.Value = IsMoore ? "" : string.Format("{0}1", InputPrefix);
         }
     }
 }

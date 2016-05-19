@@ -25,7 +25,8 @@ namespace AbstractMachineControl
         /// <summary>
         ///     Событие возникающее после создания машины
         /// </summary>
-        [Description("Событие возникающее после создания машины")] public EventHandler<MachineEventArgs> MachineCreated;
+        [Description("Событие возникающее после создания машины")]
+        public EventHandler<MachineEventArgs> MachineCreated;
 
         /// <summary>
         ///     Список возможных состояний машины
@@ -35,17 +36,24 @@ namespace AbstractMachineControl
         /// <summary>
         ///     Начальное состояние машины
         /// </summary>
-        [TypeConverter(typeof (InitialStateConverter))]
+        [TypeConverter(typeof(InitialStateConverter))]
         [Description("Устанавливает начальное состояние машины.")]
         [DisplayName("Начальное состояние")]
         public string InitialState
         {
-            get { return States[_initialStateIndex==-1?0:_initialStateIndex]; }
+            //TODO:Неправильная работа с установкой исходного состояния.
+            get { return States[_initialStateIndex == -1 ? 0 : _initialStateIndex]; }
             set
             {
+                if (_initialStateString == value) return;
+                if (_initialStateIndex != -1 && value != null)
+                {
+                    int newIndex = States.IndexOf(value);
+                    newIndex = newIndex == -1 ? 0 : newIndex;
+                    MarkInitialState(_initialStateIndex, newIndex);
+                }
                 _initialStateString = value;
                 _initialStateIndex = States.IndexOf(value);
-                MarkInitialState();
             }
         }
 
@@ -58,7 +66,7 @@ namespace AbstractMachineControl
             get { return inputLabel.Text.Substring(0, inputLabel.Text.Length - 1).ToLower(); }
             set
             {
-                inputLabel.Text = $"{value.ToUpper()}:";
+                inputLabel.Text = string.Format("{0}:", value.ToUpper());
                 UpdatePrefixes();
             }
         }
@@ -72,7 +80,7 @@ namespace AbstractMachineControl
             get { return statesLabel.Text.Substring(0, statesLabel.Text.Length - 1).ToLower(); }
             set
             {
-                statesLabel.Text = $"{value.ToUpper()}:";
+                statesLabel.Text = string.Format("{0}:", value.ToUpper());
                 UpdatePrefixes();
             }
         }
@@ -86,7 +94,7 @@ namespace AbstractMachineControl
             get { return outputLabel.Text.Substring(0, outputLabel.Text.Length - 1).ToLower(); }
             set
             {
-                outputLabel.Text = $"{value.ToUpper()}:";
+                outputLabel.Text = string.Format("{0}:", value.ToUpper());
                 UpdatePrefixes();
             }
         }
@@ -96,7 +104,7 @@ namespace AbstractMachineControl
         /// </summary>
         [Description("Определяет тип создаваемого автомата")]
         [DisplayName("Тип машины")]
-        [TypeConverter(typeof (MachineKindConverter))]
+        [TypeConverter(typeof(MachineKindConverter))]
         public bool IsMoore
         {
             get { return mooreRadioButton.Checked; }
@@ -113,7 +121,7 @@ namespace AbstractMachineControl
         [Description("Количество состояний автомата")]
         public int StatesCount
         {
-            get { return (int) statesNumericUpDown.Value; }
+            get { return (int)statesNumericUpDown.Value; }
             set { statesNumericUpDown.Value = value; }
         }
 
@@ -123,7 +131,7 @@ namespace AbstractMachineControl
         [Description("Количество входных сигналов")]
         public int InputsCount
         {
-            get { return (int) inputNumericUpDown.Value; }
+            get { return (int)inputNumericUpDown.Value; }
             set { inputNumericUpDown.Value = value; }
         }
 
@@ -133,7 +141,7 @@ namespace AbstractMachineControl
         [Description("Количество выходных сигналов")]
         public int OutputsCount
         {
-            get { return (int) outputNumericUpDown.Value; }
+            get { return (int)outputNumericUpDown.Value; }
             set { outputNumericUpDown.Value = value; }
         }
     }

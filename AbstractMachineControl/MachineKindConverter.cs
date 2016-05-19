@@ -4,6 +4,9 @@ using System.Globalization;
 
 namespace AbstractMachineControl
 {
+    /// <summary>
+    /// Конвертер для отображения строковых значений при выборе типа машины в свойствах компонента
+    /// </summary>
     internal class MachineKindConverter : BooleanConverter
     {
         private const string MOORE = "Мура";

@@ -46,7 +46,7 @@
             this.abstractMachine1.OutputsCount = 3;
             this.abstractMachine1.Size = new System.Drawing.Size(625, 247);
             this.abstractMachine1.StatePrefix = "a";
-            this.abstractMachine1.StatesCount = 6;
+            this.abstractMachine1.StatesCount = 5;
             this.abstractMachine1.TabIndex = 0;
             // 
             // MainForm

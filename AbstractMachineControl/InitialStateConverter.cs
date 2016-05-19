@@ -4,6 +4,9 @@ using System.Diagnostics;
 
 namespace AbstractMachineControl
 {
+    /// <summary>
+    /// Конвертер для отображения списка возможных состояний для исходного состояния в свойствах компонента
+    /// </summary>
     internal class InitialStateConverter : StringConverter
     {
         #region Overrides of TypeConverter
@@ -22,9 +25,7 @@ namespace AbstractMachineControl
         {
             var m = context.Instance as AbstractMachine;
             
-            if (m != null) return new StandardValuesCollection(m.States);
-            Debug.WriteLine($"{nameof(m)} is null.");
-            return null;
+            return m != null ? new StandardValuesCollection(m.States) : null;
         }
 
         public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)

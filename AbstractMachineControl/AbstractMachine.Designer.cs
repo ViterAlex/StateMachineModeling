@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AbstractMachine));
+            var resources = new System.ComponentModel.ComponentResourceManager(typeof(AbstractMachine));
             this.statesNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.inputNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
