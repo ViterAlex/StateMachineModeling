@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MachineDescription xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" InputsCount="2" StatesCount="3" OutputsCount="2" InitialState="-1" InputPrefix="z" OutputPrefix="ω" StatePrefix="a" IsMoore="false">
+  <Transitions>
+    <Transition Input="z1" OldState="a1" NewState="a2" />
+    <Transition Input="z1" OldState="a2" NewState="a3" />
+    <Transition Input="z1" OldState="a3" NewState="a1" />
+    <Transition Input="z2" OldState="a1" NewState="a3" />
+    <Transition Input="z2" OldState="a2" NewState="a1" />
+    <Transition Input="z2" OldState="a3" NewState="a2" />
+  </Transitions>
+  <Outputs>
+    <OutputSignal Input="z1" State="a1" Output="ω1" />
+    <OutputSignal Input="z1" State="a2" Output="ω2" />
+    <OutputSignal Input="z1" State="a3" Output="ω1" />
+    <OutputSignal Input="z2" State="a1" Output="ω2" />
+    <OutputSignal Input="z2" State="a2" Output="ω1" />
+    <OutputSignal Input="z2" State="a3" Output="ω2" />
+  </Outputs>
+</MachineDescription>

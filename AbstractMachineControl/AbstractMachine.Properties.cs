@@ -26,21 +26,21 @@ namespace AbstractMachineControl
         /// </summary>
         private List<string> _inputs;
         /// <summary>
-        ///     Событие возникающее после создания машины
+        ///     Событие возникающее после создания автомата
         /// </summary>
-        [Description("Событие возникающее после создания машины")]
+        [Description("Событие возникающее после создания автомата")]
         public event EventHandler<MachineEventArgs> MachineCreated;
 
         /// <summary>
-        ///     Список возможных состояний машины
+        ///     Список возможных состояний автомата
         /// </summary>
         internal List<string> States;
 
         /// <summary>
-        ///     Начальное состояние машины
+        ///     Начальное состояние автомата
         /// </summary>
         [TypeConverter(typeof(InitialStateConverter))]
-        [Description("Устанавливает начальное состояние машины.")]
+        [Description("Устанавливает начальное состояние автомата.")]
         [DisplayName("Начальное состояние")]
         [Category("Parameters")]
         public int InitialState
@@ -106,7 +106,7 @@ namespace AbstractMachineControl
         ///     Определяет тип создаваемого автомата. True — если автомат Мура.
         /// </summary>
         [Description("Определяет тип создаваемого автомата")]
-        [DisplayName("Тип машины")]
+        [DisplayName("Тип автомата")]
         [TypeConverter(typeof(MachineKindConverter))]
         [Category("Parameters")]
         public bool IsMoore

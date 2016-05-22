@@ -61,7 +61,7 @@ namespace AbstractMachineControl.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;Файлы описаний машин (*.amx)|*.amx|Все файлы|*.*&quot;.
+        ///   Looks up a localized string similar to &quot;Файлы описаний автоматов (*.amx)|*.amx|Все файлы|*.*&quot;.
         /// </summary>
         internal static string dialogFilter {
             get {

@@ -54,7 +54,7 @@ namespace AbstractMachineControl
         
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
-            //Возвращаем доступный список возможных состояний машины
+            //Возвращаем доступный список возможных состояний автомата
             var m = context.Instance as AbstractMachine;
             return m != null ? new StandardValuesCollection(m.States) : null;
         }

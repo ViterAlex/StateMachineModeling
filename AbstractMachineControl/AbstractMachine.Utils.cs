@@ -65,7 +65,7 @@ namespace AbstractMachineControl
         }
 
         /// <summary>
-        /// Открытие файла с описанием машины
+        /// Открытие файла с описанием автомата
         /// </summary>
         /// <param name="fileName">Путь к файлу</param>
         private void OpenFile(string fileName)
@@ -221,7 +221,7 @@ namespace AbstractMachineControl
                 outputDataGridView.Columns[newIndex].HeaderCell.Style.BackColor = Color.Orange;
             }
         }
-        //TODO:Создание машины
+        //TODO:Создание автомата
         private void CreateMachine(bool isMoore)
         {
             MachineBase mb;
@@ -233,22 +233,24 @@ namespace AbstractMachineControl
             {
                 mb = new MealyMachine(States[InitialState]);
             }
-            //Создание описания машины из таблиц
+            //Создание описания автомата из таблиц
             MachineDescription md = CreateMachineDescription();
             foreach (Transition transition in md.Transitions)
             {
                 //TODO:Уточнить соответствие состояний и выходных сигналов. От чего зависит выходной сигнал: от предыдущего или от следующего состояния.
-                Output output = md.Outputs.FirstOrDefault(o => (isMoore || o.Input.Equals(transition.Input)) && o.State.Equals(transition.OldState));
+                //В автомате Мура выходной сигнал будет определяться только состоянием, в которое перешёл автомат.
+                //В автомате Мили — состоянием, из которого автомат перешёл и входным сигналом.
+                Output output = md.Outputs.FirstOrDefault(o => (isMoore || o.Input.Equals(transition.Input)) && o.State.Equals(isMoore ? transition.NewState : transition.OldState));
                 //Описание выходного состояния для данного перехода
                 if (output != null)
                 {
-                    mb.AddTransition(transition.OldState,transition.Input,  transition.NewState, output.OutputSignal);
+                    mb.AddTransition(transition.OldState, transition.Input, transition.NewState, output.OutputSignal,isMoore);
                 }
             }
             if (MachineCreated != null) MachineCreated.Invoke(this, new MachineEventArgs(mb, mb.GetType()));
         }
         /// <summary>
-        /// Смена типа машины. Скрываются строки, ненужные для автомата Мура
+        /// Смена типа автомата. Скрываются строки, ненужные для автомата Мура
         /// </summary>
         private void ChangeMachineKind()
         {

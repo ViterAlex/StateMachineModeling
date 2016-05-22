@@ -43,7 +43,7 @@
             this.abstractMachine1.AutoSize = true;
             this.abstractMachine1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.abstractMachine1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.abstractMachine1.InitialState = -1;
+            this.abstractMachine1.InitialState = 1;
             this.abstractMachine1.InputPrefix = "z";
             this.abstractMachine1.InputsCount = 2;
             this.abstractMachine1.IsMoore = true;

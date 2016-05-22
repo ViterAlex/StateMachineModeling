@@ -15,7 +15,7 @@ namespace AbstractMachines
         protected MachineBase(Func<string> stateAccessor, Action<string> stateMutator)
             : base(stateAccessor, stateMutator)
         {
-            //При переходе машины из одного состояния в другое вызываем событие StateChanged
+            //При переходе автомата из одного состояния в другое вызываем событие StateChanged
             //через виртуальный метод OnStateChanged
             OnTransitioned(t =>
             OnStateChanged(new StateChangedEventArgs(
@@ -28,7 +28,7 @@ namespace AbstractMachines
         protected MachineBase(string initialState)
             : base(initialState)
         {
-            //При переходе машины из одного состояния в другое вызываем событие StateChanged
+            //При переходе автомата из одного состояния в другое вызываем событие StateChanged
             //через виртуальный метод OnStateChanged
             OnTransitioned(t =>
             OnStateChanged(new StateChangedEventArgs(
@@ -39,28 +39,14 @@ namespace AbstractMachines
         }
 
         /// <summary>
-        /// Метод создания логики работы машины на основе информации о переходах.
+        /// Создание перехода автомата в другое состояние
         /// </summary>
-        public void Create()
-        {
-            foreach (KeyValuePair<KeyValuePair<string, string>, string> pair in Transitions)
-            {
-                //Добавление переходов в Stateless
-                //Если начальное и конечное состояния совпадают.
-                if (pair.Key.Value.Equals(pair.Value))
-                    Configure(pair.Key.Value).Ignore(pair.Key.Key);
-                else
-                    Configure(pair.Key.Value).Permit(pair.Key.Key, pair.Value);
-            }
-        }
-        /// <summary>
-        /// Создание перехода машины в другое состояние
-        /// </summary>
-        /// <param name="fromState">Текущее состояние машины</param>
+        /// <param name="fromState">Текущее состояние автомата</param>
         /// <param name="input">Входной сигнал</param>
-        /// <param name="toState">Следующее состояние машины</param>
+        /// <param name="toState">Следующее состояние автомата</param>
         /// <param name="output">Выходной сигнал</param>
-        public void AddTransition(string fromState, string input, string toState, string output)
+        /// <param name="isMoore"></param>
+        public void AddTransition(string fromState, string input, string toState, string output, bool isMoore)
         {
             if (Transitions == null)
             {
@@ -72,14 +58,15 @@ namespace AbstractMachines
             {
                 Outputs = new Dictionary<KeyValuePair<string, string>, string>();
             }
-            Outputs.Add(new KeyValuePair<string, string>(input, fromState), output);
+            //
+            Outputs.Add(new KeyValuePair<string, string>(input, isMoore ? toState : fromState), output);
         }
         /// <summary>
-        /// Словарь выходных сигналов. Ключ словаря — входной сигнал и текущее состояние машины. Значение словаря — новый выходной сигнал
+        /// Словарь выходных сигналов. Ключ словаря — входной сигнал и текущее состояние для автомата Мили и новое состояние для автомата Мура. Значение словаря — новый выходной сигнал
         /// </summary>
         public Dictionary<KeyValuePair<string, string>, string> Outputs { get; set; }
         /// <summary>
-        /// Словарь переходов. Ключ словаря — входной сигнал и текущее состояние машины. Значение словаря — новое состояние машины
+        /// Словарь переходов. Ключ словаря — входной сигнал и текущее состояние автомата. Значение словаря — новое состояние автомата
         /// </summary>
         public Dictionary<KeyValuePair<string, string>, string> Transitions { get; set; }
 

@@ -4,16 +4,16 @@ using AbstractMachines;
 namespace AbstractMachineControl
 {
     /// <summary>
-    /// Аргументы события для абстрактной машины
+    /// Аргументы события для абстрактной автомата
     /// </summary>
     public class MachineEventArgs : EventArgs
     {
         /// <summary>
-        /// Созданная машина
+        /// Созданный автомат
         /// </summary>
         public MachineBase Machine { get; private set; }
         /// <summary>
-        /// Тип созданной машины
+        /// Тип созданной автомата
         /// </summary>
         public Type MachineType { get; private set; }
 
