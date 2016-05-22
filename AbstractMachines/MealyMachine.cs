@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AbstractMachines
 {
@@ -13,14 +14,5 @@ namespace AbstractMachines
             : base(initialState)
         {
         }
-
-        #region Overrides of MachineBase
-
-        public override void Create()
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
     }
 }

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="dialogFilter" xml:space="preserve">
-    <value>"Файлы описаний машин (*.am)|*.am|Все файлы|*.*"</value>
+    <value>"Файлы описаний машин (*.amx)|*.amx|Все файлы|*.*"</value>
     <comment>Строка фильтра для диалогов открытия и сохранения файлов</comment>
   </data>
 </root>

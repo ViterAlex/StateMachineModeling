@@ -13,14 +13,6 @@ namespace AbstractMachines
             : base(initialState)
         {
         }
-
-        #region Overrides of MachineBase
-
-        public override void Create()
-        {
-            //Configure(State).
-        }
-
-        #endregion
+        
     }
 }

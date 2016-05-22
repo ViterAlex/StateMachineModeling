@@ -48,6 +48,7 @@
     <Compile Include="MealyMachine.cs" />
     <Compile Include="MooreMachine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StateChangedEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

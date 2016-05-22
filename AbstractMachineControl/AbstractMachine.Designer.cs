@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            var resources = new System.ComponentModel.ComponentResourceManager(typeof(AbstractMachine));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AbstractMachine));
             this.statesNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.inputNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -71,20 +71,10 @@
             0,
             0,
             0});
-            this.statesNumericUpDown.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
             this.statesNumericUpDown.Name = "statesNumericUpDown";
             this.statesNumericUpDown.Size = new System.Drawing.Size(52, 20);
             this.statesNumericUpDown.TabIndex = 1;
             this.statesNumericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.statesNumericUpDown.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
             this.statesNumericUpDown.ValueChanged += new System.EventHandler(this.NumericUpDown_ValueChanged);
             // 
             // inputNumericUpDown
@@ -95,20 +85,10 @@
             0,
             0,
             0});
-            this.inputNumericUpDown.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
             this.inputNumericUpDown.Name = "inputNumericUpDown";
             this.inputNumericUpDown.Size = new System.Drawing.Size(52, 20);
             this.inputNumericUpDown.TabIndex = 2;
             this.inputNumericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.inputNumericUpDown.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
             this.inputNumericUpDown.ValueChanged += new System.EventHandler(this.NumericUpDown_ValueChanged);
             // 
             // tableLayoutPanel1
@@ -211,6 +191,7 @@
             this.transitDataGridView.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToDisplayedHeaders;
             this.transitDataGridView.Size = new System.Drawing.Size(294, 181);
             this.transitDataGridView.TabIndex = 1;
+            this.transitDataGridView.ColumnHeaderMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.transitDataGridView_ColumnHeaderMouseDoubleClick);
             this.transitDataGridView.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.DataGridView_DataError);
             // 
             // outputDataGridView
@@ -228,6 +209,7 @@
             this.outputDataGridView.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToDisplayedHeaders;
             this.outputDataGridView.Size = new System.Drawing.Size(294, 181);
             this.outputDataGridView.TabIndex = 2;
+            this.outputDataGridView.ColumnHeaderMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.transitDataGridView_ColumnHeaderMouseDoubleClick);
             this.outputDataGridView.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.DataGridView_DataError);
             // 
             // outputTableLabel
@@ -253,6 +235,7 @@
             // toolStrip1
             // 
             this.tableLayoutPanel1.SetColumnSpan(this.toolStrip1, 2);
+            this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripButton,
             this.saveToolStripButton,
@@ -330,20 +313,10 @@
             0,
             0,
             0});
-            this.outputNumericUpDown.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
             this.outputNumericUpDown.Name = "outputNumericUpDown";
             this.outputNumericUpDown.Size = new System.Drawing.Size(52, 20);
             this.outputNumericUpDown.TabIndex = 3;
             this.outputNumericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.outputNumericUpDown.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
             this.outputNumericUpDown.ValueChanged += new System.EventHandler(this.NumericUpDown_ValueChanged);
             // 
             // outputLabel

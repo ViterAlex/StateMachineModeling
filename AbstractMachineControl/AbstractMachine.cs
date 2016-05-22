@@ -1,19 +1,60 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace AbstractMachineControl
 {
-    public partial class AbstractMachine : UserControl
+    public partial class AbstractMachine : UserControl, INotifyPropertyChanged
     {
         public AbstractMachine()
         {
             InitializeComponent();
-            StatePrefix = "a";
             InputPrefix = "z";
+            StatePrefix = "a";
             OutputPrefix = "ω";
             mealyRadioButton.Checked = true;
-            UpdateColumns(StatesCount);
-            UpdateRows(InputsCount);
+            PropertyChanged += AbstractMachine_PropertyChanged;
+        }
+
+        private void AbstractMachine_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            createButton.Enabled = InitialState != -1;
+            saveToolStripButton.Enabled = transitDataGridView.RowCount > 0 && transitDataGridView.ColumnCount > 0;
+        }
+
+        /// <summary>
+        /// Задание перехода для таблицы переходов
+        /// </summary>
+        /// <param name="input">Входной сигнал</param>
+        /// <param name="state">Состояние</param>
+        /// <param name="newState">Новое состояние</param>
+        public void SetTransition(string input, string state, string newState)
+        {
+            DataGridViewRow row =
+                transitDataGridView.Rows.Cast<DataGridViewRow>()
+                                   .FirstOrDefault(r => r.HeaderCell.Value.ToString().Equals(input) && r.Index != -1);
+            if (row != null)
+            {
+                row.Cells[state].Value = newState;
+            }
+        }
+        /// <summary>
+        /// Заднание выходного сигнала для таблицы выходов
+        /// </summary>
+        /// <param name="input">Входной сигнал</param>
+        /// <param name="state">Состояние</param>
+        /// <param name="output">Выходной сигнал</param>
+        public void SetOutput(string input, string state, string output)
+        {
+            DataGridViewRow row =
+                outputDataGridView.Rows.Cast<DataGridViewRow>()
+                                   .FirstOrDefault(r => r.HeaderCell.Value.ToString().Equals(input) && r.Index != -1);
+            if (row != null)
+            {
+                row.Cells[state].Value = output;
+            }
         }
         /// <summary>
         /// Смена значения в одном из числовых полей
@@ -26,14 +67,18 @@ namespace AbstractMachineControl
             {
                 case "statesNumericUpDown":
                     UpdateColumns((int)upDown.Value);
+                    UpdateLists();
+                    UpdateDataSources();
                     break;
                 case "inputNumericUpDown":
                     UpdateRows((int)upDown.Value);
                     break;
                 case "outputNumericUpDown":
                     UpdateLists();
+                    UpdateDataSources();
                     break;
             }
+            OnPropertyChanged();
         }
         /// <summary>
         /// Смена состояния флажка
@@ -79,7 +124,22 @@ namespace AbstractMachineControl
         /// </summary>
         private void DataGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
-            ((DataGridView) sender)[e.ColumnIndex, e.RowIndex].Value = null;
+            ((DataGridView)sender)[e.ColumnIndex, e.RowIndex].Value = null;
+        }
+        /// <summary>
+        /// Двойной клик по заголовку столбца делает это состояние начальным
+        /// </summary>
+        private void transitDataGridView_ColumnHeaderMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            InitialState = e.ColumnIndex;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -15,12 +15,10 @@ namespace AbstractMachineControl
         /// </summary>
         private void UpdateLists()
         {
-            States = transitDataGridView.Columns.OfType<DataGridViewColumn>().Select(c =>
-                string.Format("{0}{1}", StatePrefix, c.Index + 1)).ToList();
+            States = Enumerable.Range(1, StatesCount).Select(n => string.Format("{0}{1}", StatePrefix, n)).ToList();
+            _inputs = Enumerable.Range(1, InputsCount).Select(n => string.Format("{0}{1}", InputPrefix, n)).ToList();
             _outputs = Enumerable.Range(1, OutputsCount).Select(n => string.Format("{0}{1}", OutputPrefix, n)).ToList();
-            transitDataGridView.Columns.OfType<DataGridViewComboBoxColumn>().ToList().ForEach(c => c.DataSource = States);
-            outputDataGridView.Columns.OfType<DataGridViewComboBoxColumn>().ToList().ForEach(c => c.DataSource = _outputs);
-            InitialState = _initialStateString;
+            _initialState = _initialState > States.Count - 1 ? -1 : _initialState;
         }
         /// <summary>
         /// Сохранение в файл
@@ -28,49 +26,88 @@ namespace AbstractMachineControl
         /// <param name="fileName">Путь к файлу</param>
         private void SaveToFile(string fileName)
         {
-            var sb = new StringBuilder();
-            sb.AppendFormat("{0}\n", IsMoore ? 1 : 0);
-            sb.AppendFormat("StatesCount: {0}\n", StatesCount);
-            sb.AppendFormat("InputsCount: {0}\n", InputsCount);
-            sb.AppendFormat("OutputCouns: {0}\n", OutputsCount);
+            MachineDescription machineDescription = CreateMachineDescription();
+            MachineDescription.Serialize(fileName, machineDescription);
+        }
+        /// <summary>
+        /// Создание описания конечного автомата на основе таблиц переходов и выходов
+        /// </summary>
+        private MachineDescription CreateMachineDescription()
+        {
+            var md = new MachineDescription(InputsCount, StatesCount, OutputsCount, InitialState, IsMoore)
+            {
+                InputPrefix = InputPrefix,
+                OutputPrefix = OutputPrefix,
+                StatePrefix = StatePrefix
+            };
             foreach (DataGridViewRow row in transitDataGridView.Rows)
             {
-                sb.AppendFormat("{0}:", row.HeaderCell.Value);
                 for (int i = 0, n = row.Cells.Count; i < n; i++)
                 {
-                    sb.AppendFormat("{0};{1}{2}",
+                    if (row.Cells[i].Value == null) continue; ;
+                    md.Transitions.Add(new Transition(
+                        row.HeaderCell.Value.ToString(),
                         transitDataGridView.Columns[i].HeaderText,
-                        row.Cells[i].Value,
-                        i == 0 || i == n - 1 ? "" : ";");
+                        row.Cells[i].Value.ToString()));
                 }
-                sb.AppendLine();
             }
-            if (!IsMoore)
+
+            foreach (DataGridViewRow row in outputDataGridView.Rows)
             {
-                foreach (DataGridViewRow row in outputDataGridView.Rows)
+                if (!row.Visible) continue;
+                for (int i = 0, n = row.Cells.Count; i < n; i++)
                 {
-                    sb.AppendFormat("{0}:", row.HeaderCell.Value);
-                    for (int i = 0, n = row.Cells.Count; i < n; i++)
-                    {
-                        sb.AppendFormat("{0};{1}{2}",
-                            outputDataGridView.Columns[i].HeaderText,
-                            row.Cells[i].Value,
-                            i == 0 || i == n - 1 ? "" : ";");
-                    }
-                    sb.AppendLine();
+                    if (row.Cells[i].Value == null) continue;
+                    md.Outputs.Add(new Output(
+                        row.HeaderCell.Value.ToString(),
+                        outputDataGridView.Columns[i].HeaderText,
+                        row.Cells[i].Value.ToString()));
                 }
             }
-            File.WriteAllText(fileName, sb.ToString());
+            return md;
         }
+
         /// <summary>
         /// Открытие файла с описанием машины
         /// </summary>
         /// <param name="fileName">Путь к файлу</param>
         private void OpenFile(string fileName)
         {
-            var strings = File.ReadAllLines(fileName);
-            //TODO:Импорт файла в таблицы
+            MachineDescription md = MachineDescription.Deserialize(fileName);
+            if (md == null) return;
+            StatesCount = md.StatesCount;
+            InputsCount = md.InputsCount;
+            OutputsCount = OutputsCount;
+            InputPrefix = md.InputPrefix;
+            OutputPrefix = md.OutputPrefix;
+            StatePrefix = md.StatePrefix;
+            InitialState = md.InitialState;
+            IsMoore = md.IsMoore;
+            Clear();
+            UpdateLists();
+            UpdateColumns(StatesCount);
+            UpdatePrefixes();
+            MarkInitialState(-1, InitialState);
+            foreach (Transition transition in md.Transitions)
+            {
+                SetTransition(transition.Input, transition.OldState, transition.NewState);
+            }
+            foreach (Output output in md.Outputs)
+            {
+                SetOutput(output.Input, output.State, output.OutputSignal);
+            }
         }
+        /// <summary>
+        /// Очистка таблиц
+        /// </summary>
+        private void Clear()
+        {
+            transitDataGridView.Rows.Clear();
+            transitDataGridView.Columns.Clear();
+            outputDataGridView.Rows.Clear();
+            outputDataGridView.Columns.Clear();
+        }
+
         /// <summary>
         /// Обновление количества строк в таблицах
         /// </summary>
@@ -78,6 +115,7 @@ namespace AbstractMachineControl
         private void UpdateRows(int value)
         {
             if (value == transitDataGridView.RowCount) return;
+            if (transitDataGridView.ColumnCount == 0 && outputDataGridView.ColumnCount == 0) return;
             if (transitDataGridView.Rows.Count > value)
             {
                 //Удаление строк
@@ -98,6 +136,7 @@ namespace AbstractMachineControl
                     outputDataGridView.Rows[index].HeaderCell.Value = string.Format("{0}{1}", InputPrefix, index + 1);
                 }
             }
+            ChangeMachineKind();
         }
         /// <summary>
         /// Обновление количества столбцов в таблицах
@@ -121,22 +160,25 @@ namespace AbstractMachineControl
                 //Добавление столбцов
                 for (int i = 0, n = value - transitDataGridView.ColumnCount; i < n; i++)
                 {
+                    //в таблицу переходов
                     var column = new DataGridViewComboBoxColumn
                     {
-                        Name = string.Format("{0}{1}", StatePrefix, transitDataGridView.ColumnCount),
-                        HeaderText = string.Format("{0}{1}", StatePrefix, transitDataGridView.ColumnCount + 1)
+                        Name = string.Format("{0}{1}", StatePrefix, transitDataGridView.ColumnCount + 1),
+                        HeaderText = string.Format("{0}{1}", StatePrefix, transitDataGridView.ColumnCount + 1),
+                        DataSource = States
                     };
                     transitDataGridView.Columns.Add(column);
+                    //в таблицу выходов
                     var column1 = new DataGridViewComboBoxColumn
                     {
-                        Name = string.Format("{0}{1}", StatePrefix, outputDataGridView.ColumnCount),
-                        HeaderText = string.Format("{0}{1}", StatePrefix, outputDataGridView.ColumnCount + 1)
+                        Name = string.Format("{0}{1}", StatePrefix, outputDataGridView.ColumnCount + 1),
+                        HeaderText = string.Format("{0}{1}", StatePrefix, outputDataGridView.ColumnCount + 1),
+                        DataSource = _outputs
                     };
                     outputDataGridView.Columns.Add(column1);
                 }
             }
-            UpdateLists();
-            MarkInitialState(0,0);
+            UpdateRows(InputsCount);
         }
         /// <summary>
         /// Обновление префиксов
@@ -145,12 +187,17 @@ namespace AbstractMachineControl
         {
             foreach (DataGridViewRow row in transitDataGridView.Rows)
                 row.HeaderCell.Value = string.Format("{0}{1}", InputPrefix, row.Index + 1);
-            foreach (DataGridViewRow row in outputDataGridView.Rows)
-                row.HeaderCell.Value = string.Format("{0}{1}", InputPrefix, row.Index + 1);
+            ChangeMachineKind();
             foreach (DataGridViewColumn column in transitDataGridView.Columns)
+            {
                 column.HeaderText = string.Format("{0}{1}", StatePrefix, column.Index + 1);
+                column.Name = column.HeaderText;
+            }
             foreach (DataGridViewColumn column in outputDataGridView.Columns)
+            {
                 column.HeaderText = string.Format("{0}{1}", StatePrefix, column.Index + 1);
+                column.Name = column.HeaderText;
+            }
             UpdateLists();
         }
         /// <summary>
@@ -159,11 +206,23 @@ namespace AbstractMachineControl
         private void MarkInitialState(int oldIndex, int newIndex)
         {
             if (transitDataGridView.ColumnCount == 0 || outputDataGridView.ColumnCount == 0) return;
-            
-            transitDataGridView.Columns[oldIndex].HeaderCell.Style.BackColor = SystemColors.Control;
-            transitDataGridView.Columns[newIndex].HeaderCell.Style.BackColor = Color.Orange;
-            outputDataGridView.Columns[oldIndex].HeaderCell.Style.BackColor = SystemColors.Control;
-            outputDataGridView.Columns[newIndex].HeaderCell.Style.BackColor = Color.Orange;
+            if (oldIndex == -1 && newIndex != -1)
+            {
+                transitDataGridView.Columns[newIndex].HeaderCell.Style.BackColor = Color.Orange;
+                outputDataGridView.Columns[newIndex].HeaderCell.Style.BackColor = Color.Orange;
+            }
+            else if (oldIndex != -1 && newIndex == -1)
+            {
+                transitDataGridView.Columns[oldIndex].HeaderCell.Style.BackColor = SystemColors.Control;
+                outputDataGridView.Columns[oldIndex].HeaderCell.Style.BackColor = SystemColors.Control;
+            }
+            else if (oldIndex != -1 && newIndex != -1)
+            {
+                transitDataGridView.Columns[oldIndex].HeaderCell.Style.BackColor = SystemColors.Control;
+                transitDataGridView.Columns[newIndex].HeaderCell.Style.BackColor = Color.Orange;
+                outputDataGridView.Columns[oldIndex].HeaderCell.Style.BackColor = SystemColors.Control;
+                outputDataGridView.Columns[newIndex].HeaderCell.Style.BackColor = Color.Orange;
+            }
         }
         //TODO:Создание машины
         private void CreateMachine(bool isMoore)
@@ -171,32 +230,22 @@ namespace AbstractMachineControl
             MachineBase mb;
             if (isMoore)
             {
-                mb = new MooreMachine(InitialState);
+                mb = new MooreMachine(States[InitialState]);
             }
             else
             {
-                mb = new MealyMachine(InitialState);
+                mb = new MealyMachine(States[InitialState]);
             }
-            //Перебор строк в таблице переходов
-            foreach (DataGridViewRow row in transitDataGridView.Rows)
+            //Создание описания машины из таблиц
+            MachineDescription md = CreateMachineDescription();
+            foreach (Transition transition in md.Transitions)
             {
-                //Перебор ячеек в каждой строке
-                foreach (DataGridViewComboBoxCell cell in row.Cells)
+                //TODO:Уточнить соответствие состояний и выходных сигналов. От чего зависит выходной сигнал: от предыдущего или от следующего состояния.
+                Output output = md.Outputs.FirstOrDefault(o => (isMoore || o.Input.Equals(transition.Input)) && o.State.Equals(transition.OldState));
+                //Описание выходного состояния для данного перехода
+                if (output != null)
                 {
-                    //Если ячейка пустая, то такого перехода не существует.
-                    if (cell.Value == null) continue;
-                    //Строка текущего состояния
-                    var from = transitDataGridView.Columns[cell.ColumnIndex].HeaderText;
-                    //Строка входного сигнала
-                    var input = row.HeaderCell.Value.ToString();
-                    //Строка нового состояния
-                    var to = cell.Value.ToString();
-                    //Индекс строки из которой берём выходной сигнал.
-                    //Для Мура это 0 строка, для Мили — соответствующая
-                    var index = isMoore ? 0 : cell.RowIndex;
-                    //Строка выходного сигнала
-                    var output = outputDataGridView[cell.ColumnIndex, index].Value.ToString();
-                    mb.AddTransition(from, input, to, output);
+                    mb.AddTransition(transition.OldState,transition.Input,  transition.NewState, output.OutputSignal);
                 }
             }
             if (MachineCreated != null) MachineCreated.Invoke(this, new MachineEventArgs(mb, mb.GetType()));
@@ -212,6 +261,14 @@ namespace AbstractMachineControl
                 outputDataGridView.Rows[i].Visible = !IsMoore;
             }
             outputDataGridView.Rows[0].HeaderCell.Value = IsMoore ? "" : string.Format("{0}1", InputPrefix);
+        }
+        /// <summary>
+        /// Обновление списков в таблице переходов и выходов
+        /// </summary>
+        private void UpdateDataSources()
+        {
+            transitDataGridView.Columns.OfType<DataGridViewComboBoxColumn>().ToList().ForEach(c => c.DataSource = States);
+            outputDataGridView.Columns.OfType<DataGridViewComboBoxColumn>().ToList().ForEach(c => c.DataSource = _outputs);
         }
     }
 }

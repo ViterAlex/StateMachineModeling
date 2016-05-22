@@ -39,7 +39,7 @@ namespace AbstractMachineControl.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    var temp = new global::System.Resources.ResourceManager("AbstractMachineControl.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AbstractMachineControl.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,7 +61,7 @@ namespace AbstractMachineControl.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;Файлы описаний машин (*.am)|*.am|Все файлы|*.*&quot;.
+        ///   Looks up a localized string similar to &quot;Файлы описаний машин (*.amx)|*.amx|Все файлы|*.*&quot;.
         /// </summary>
         internal static string dialogFilter {
             get {

@@ -13,20 +13,23 @@ using System.ComponentModel;
 
 namespace AbstractMachineControl
 {
+    [DefaultEvent("MachineCreated")]
     public partial class AbstractMachine
     {
-        private int _initialStateIndex;
-        private string _initialStateString;
+        private int _initialState;
         /// <summary>
         ///     Список выходных сигналов
         /// </summary>
         private List<string> _outputs;
-
+        /// <summary>
+        /// Список входных сигналов
+        /// </summary>
+        private List<string> _inputs;
         /// <summary>
         ///     Событие возникающее после создания машины
         /// </summary>
         [Description("Событие возникающее после создания машины")]
-        public EventHandler<MachineEventArgs> MachineCreated;
+        public event EventHandler<MachineEventArgs> MachineCreated;
 
         /// <summary>
         ///     Список возможных состояний машины
@@ -36,24 +39,18 @@ namespace AbstractMachineControl
         /// <summary>
         ///     Начальное состояние машины
         /// </summary>
-        [TypeConverter(typeof(InitialStateConverter))]
+        //[TypeConverter(typeof(InitialStateConverter))]
         [Description("Устанавливает начальное состояние машины.")]
         [DisplayName("Начальное состояние")]
-        public string InitialState
+        [Category("Parameters")]
+        public int InitialState
         {
-            //TODO:Неправильная работа с установкой исходного состояния.
-            get { return States[_initialStateIndex == -1 ? 0 : _initialStateIndex]; }
+            get { return _initialState; }
             set
             {
-                if (_initialStateString == value) return;
-                if (_initialStateIndex != -1 && value != null)
-                {
-                    int newIndex = States.IndexOf(value);
-                    newIndex = newIndex == -1 ? 0 : newIndex;
-                    MarkInitialState(_initialStateIndex, newIndex);
-                }
-                _initialStateString = value;
-                _initialStateIndex = States.IndexOf(value);
+                MarkInitialState(_initialState, value);
+                _initialState = value;
+                OnPropertyChanged();
             }
         }
 
@@ -61,6 +58,7 @@ namespace AbstractMachineControl
         ///     Префикс для обозначения входных сигналов
         /// </summary>
         [Description("Префикс для обозначения входных сигналов")]
+        [Category("Parameters")]
         public string InputPrefix
         {
             get { return inputLabel.Text.Substring(0, inputLabel.Text.Length - 1).ToLower(); }
@@ -68,6 +66,7 @@ namespace AbstractMachineControl
             {
                 inputLabel.Text = string.Format("{0}:", value.ToUpper());
                 UpdatePrefixes();
+                OnPropertyChanged();
             }
         }
 
@@ -75,6 +74,7 @@ namespace AbstractMachineControl
         ///     Префикс для обозначения состояний
         /// </summary>
         [Description("Префикс для обозначения состояний")]
+        [Category("Parameters")]
         public string StatePrefix
         {
             get { return statesLabel.Text.Substring(0, statesLabel.Text.Length - 1).ToLower(); }
@@ -82,6 +82,7 @@ namespace AbstractMachineControl
             {
                 statesLabel.Text = string.Format("{0}:", value.ToUpper());
                 UpdatePrefixes();
+                OnPropertyChanged();
             }
         }
 
@@ -89,6 +90,7 @@ namespace AbstractMachineControl
         ///     Префикс для обозначения выходных сигналов
         /// </summary>
         [Description("Префикс для обозначения выходных сигналов")]
+        [Category("Parameters")]
         public string OutputPrefix
         {
             get { return outputLabel.Text.Substring(0, outputLabel.Text.Length - 1).ToLower(); }
@@ -96,6 +98,7 @@ namespace AbstractMachineControl
             {
                 outputLabel.Text = string.Format("{0}:", value.ToUpper());
                 UpdatePrefixes();
+                OnPropertyChanged();
             }
         }
 
@@ -105,6 +108,7 @@ namespace AbstractMachineControl
         [Description("Определяет тип создаваемого автомата")]
         [DisplayName("Тип машины")]
         [TypeConverter(typeof(MachineKindConverter))]
+        [Category("Parameters")]
         public bool IsMoore
         {
             get { return mooreRadioButton.Checked; }
@@ -112,6 +116,7 @@ namespace AbstractMachineControl
             {
                 mooreRadioButton.Checked = value;
                 mealyRadioButton.Checked = !value;
+                OnPropertyChanged();
             }
         }
 
@@ -119,30 +124,45 @@ namespace AbstractMachineControl
         ///     Количество состояний автомата
         /// </summary>
         [Description("Количество состояний автомата")]
+        [Category("Parameters")]
         public int StatesCount
         {
             get { return (int)statesNumericUpDown.Value; }
-            set { statesNumericUpDown.Value = value; }
+            set
+            {
+                statesNumericUpDown.Value = value;
+                OnPropertyChanged();
+            }
         }
 
         /// <summary>
         ///     Количество входных сигналов
         /// </summary>
         [Description("Количество входных сигналов")]
+        [Category("Parameters")]
         public int InputsCount
         {
             get { return (int)inputNumericUpDown.Value; }
-            set { inputNumericUpDown.Value = value; }
+            set
+            {
+                inputNumericUpDown.Value = value;
+                OnPropertyChanged();
+            }
         }
 
         /// <summary>
         ///     Количество выходных сигналов
         /// </summary>
         [Description("Количество выходных сигналов")]
+        [Category("Parameters")]
         public int OutputsCount
         {
             get { return (int)outputNumericUpDown.Value; }
-            set { outputNumericUpDown.Value = value; }
+            set
+            {
+                outputNumericUpDown.Value = value;
+                OnPropertyChanged();
+            }
         }
     }
 }
