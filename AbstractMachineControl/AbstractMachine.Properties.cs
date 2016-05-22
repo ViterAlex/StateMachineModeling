@@ -39,7 +39,7 @@ namespace AbstractMachineControl
         /// <summary>
         ///     Начальное состояние машины
         /// </summary>
-        //[TypeConverter(typeof(InitialStateConverter))]
+        [TypeConverter(typeof(InitialStateConverter))]
         [Description("Устанавливает начальное состояние машины.")]
         [DisplayName("Начальное состояние")]
         [Category("Parameters")]
